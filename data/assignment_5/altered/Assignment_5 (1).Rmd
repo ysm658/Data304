@@ -1,0 +1,46 @@
+---
+title: "Assignment_5"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(networkD3)
+```
+
+```{r}
+course_pathways <-read.csv("course_pathways.csv")
+catalog <- read.csv("course_catalog_by_major.csv")
+
+
+```
+
+
+```{r}
+valid_majors <- c("Data Science", "Artificial Intelligence", "Cybersecurity")
+
+filtered_paths <- course_pathways %>%
+  filter(Major %in% valid_majors)
+```
+
+
+```{r}
+required <- catalog %>%
+  filter(Type == "Required") %>%
+  select(Major, Course)
+
+required_paths <- filtered_paths %>%
+  mutate(CourseList = strsplit(CoursePath, " -> ")) %>%
+  unnest(CourseList) %>%
+  group_by(StudentID) %>%
+  mutate(Step = row_number())
+
+required_courses <- required_paths %>%
+  mutate(CourseList = str_trim(CourseList)) %>%
+  left_join(required %>% 
+              mutate(Course = str_trim(Course)), 
+            by = c("Major", "CourseList" = "Course")) %>%
+  filter(!is.na(Type)) %>%
+  arrange(StudentID, Step)
+```
+
