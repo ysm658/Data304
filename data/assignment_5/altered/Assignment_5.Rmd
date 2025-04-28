@@ -1,0 +1,33 @@
+---
+title: "Assignment_5"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(networkD3)
+library(readr)
+
+transitions <- read_csv("transitions.csv")
+```
+
+
+```{r}
+nodes <- data.frame(name = unique(c(transitions$Source, transitions$Target)))
+
+# Step 3: Map course names to node indices
+transitions$SourceID <- match(transitions$Source, nodes$name) - 1
+transitions$TargetID <- match(transitions$Target, nodes$name) - 1
+```
+
+
+```{r}
+sankeyNetwork(Links = transitions,
+              Nodes = nodes,
+              Source = "SourceID",
+              Target = "TargetID",
+              Value = "Count",
+              NodeID = "name",
+              sinksRight = TRUE)
+```
+
